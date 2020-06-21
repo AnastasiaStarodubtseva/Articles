@@ -1,7 +1,20 @@
+$light-blue: #edf2f7;
+$blue: #4470e0;
+
 body {
-  color: red;
+  background-color: $light-blue;
 }
 
 .article {
-  border: 1px solid #000;
-}  
+  color: $blue;
+  border: 1px solid #dbe2ed;
+  background-color: #fff;
+  margin-bottom: 20px;
+  padding: 10px;
+  text-transform: capitalize;
+  .content {
+    color: #34393e;
+    text-transform: capitalize;
+  }
+}
+
