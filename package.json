@@ -1,0 +1,22 @@
+{
+  "name": "riskbook-market-list-ui",
+  "version": "0.0.1",
+  "description": "Market-List UI for Riskbook",
+  "scripts": {
+    "build": "parcel build index.html",
+    "serve": "parcel serve index.html -p 3000 --public-url /",
+    "clean": "rm -rf {dist,.cache,node_modules}",
+    "reinstall": "yarn clean && yarn install"
+  },
+  "devDependencies": {
+    "elm-hot": "^1.0.1",
+    "node-elm-compiler": "^5.0.4",
+    "parcel-bundler": "^1.12.4",
+    "sass": "^1.26.8"
+  },
+  "dependencies": {
+    "animate.css": "^4.1.0",
+    "jquery": "^3.4.1",
+    "normalize.css": "^8.0.1"
+  }
+}
