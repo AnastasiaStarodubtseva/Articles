@@ -1,11 +1,20 @@
 module Main exposing (main)
 
+import Maybe.Extra exposing (values)
 import List.Extra exposing (groupsOf)
 import Http
 import Html exposing (..)
 import Browser
 import Json.Decode exposing (..)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, placeholder)
+import Html.Events exposing (onInput)
+
+type alias Flags = {}
+
+type Msg
+  = FetchArticlesDone (Result Http.Error (List Article))
+  | FetchAuthorsDone (Result Http.Error (List Author))
+  | SetQuery String
 
 type alias Article =
   { title : String
@@ -21,13 +30,17 @@ type alias Author =
 type alias Model =
   { articles : List Article
   , authors : List Author
+  , query : String
   }
 
-type alias Flags = {}
-
-type Msg
-  = FetchArticlesDone (Result Http.Error (List Article))
-  | FetchAuthorsDone (Result Http.Error (List Author))
+init : Flags -> (Model, Cmd Msg)
+init flags =
+  ( { articles = []
+    , authors = []
+    , query = ""
+    }
+  , Cmd.batch [ fetchArticles, fetchAuthors ]
+  )
 
 decodeArticle : Decoder Article
 decodeArticle =
@@ -35,7 +48,6 @@ decodeArticle =
     (field "title" string)
     (field "body" string)
     (field "userId" int)
-
 
 articlesDecoder : Decoder (List Article)
 articlesDecoder = list decodeArticle
@@ -46,6 +58,7 @@ fetchArticles =
     { url = "https://jsonplaceholder.typicode.com/posts"
     , expect = Http.expectJson FetchArticlesDone articlesDecoder
     }
+
 decodeAuthor : Decoder Author
 decodeAuthor =
   map2 Author
@@ -55,23 +68,12 @@ decodeAuthor =
 authorsDecoder : Decoder (List Author)
 authorsDecoder = list decodeAuthor
 
-
-
-
 fetchAuthors : Cmd Msg
 fetchAuthors =
   Http.get
     { url = "https://jsonplaceholder.typicode.com/users"
     , expect = Http.expectJson FetchAuthorsDone authorsDecoder
     }
-
-init : Flags -> (Model, Cmd Msg)
-init flags =
-  ( { articles = []
-    , authors = []
-    }
-  , Cmd.batch [ fetchArticles, fetchAuthors ]
-  )
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
@@ -89,39 +91,53 @@ update msg model = case msg of
           in (model, Cmd.none)
       Ok newAuthors ->
         ({ model | authors = newAuthors }, Cmd.none)
+  SetQuery newQuery ->
+    ({ model | query = newQuery }, Cmd.none)
 
 subscriptions : Model -> Sub Msg
 subscriptions _ = Sub.batch []
 
-articleRowView : Model -> List Article -> Html a
-articleRowView model articles =
-  div [ class "row" ] (List.map (articleView model) articles)
+articlesWithAuthors : List Article -> List Author -> List (Article, Author)
+articlesWithAuthors articles authors =
+  let f art =
+        authors
+          |> List.filter (\auth -> auth.id == art.userId)
+          |> List.head
+          |> Maybe.map (\author -> (art, author))
+   in values <| List.map f articles
 
-articleView : Model -> Article -> Html a
-articleView model article =
-  let
-      mAuthor =
-        List.head (List.filter (\a -> a.id == article.userId) model.authors)
-  in
-      div
-        [ class "article"
-        , class "four"
-        , class "columns"
-        ] [ p [class "title"] [text article.title]
-          , p [class "content"] [text article.content]
-          , case mAuthor of 
-              Nothing ->  text ""
-              Just author -> 
-                p [class "author"] [text author.name]
-          ]
+articleRowView : List (Article, Author) -> Html a
+articleRowView  articles =
+  div [ class "row" ] (List.map articleView articles)
 
-view : Model -> Html a
+articleView : (Article, Author) -> Html a
+articleView (article, author) =
+  div
+    [ class "article"
+    , class "four"
+    , class "columns"
+    ] [ p [class "title"] [text article.title]
+      , p [class "content"] [text article.content]
+      , p [class "author"] [text author.name]
+      ]
+
+view : Model -> Html Msg
 view model =
   let
-      rows = groupsOf 3 model.articles
+      articles =
+        if String.length model.query > 0
+        then
+          articlesWithAuthors model.articles model.authors
+            |> List.filter (\(article, author) -> String.contains model.query author.name)
+        else
+          articlesWithAuthors model.articles model.authors
+
+      rows =
+        groupsOf 3 articles
   in
       div []
-        [ div [ class "container" ] (List.map (articleRowView model) rows)
+        [ div [] [input [placeholder "Filter by author...", onInput SetQuery] []]
+        , div [ class "container" ] (List.map articleRowView rows)
         ]
 
 main : Program Flags Model Msg
