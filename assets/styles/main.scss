@@ -1,20 +1,47 @@
 $light-blue: #edf2f7;
-$blue: #4470e0;
+$blue: #126ddd;
+$light-black: #323234;
+$grey: #9ba2a8;
 
 body {
   background-color: $light-blue;
 }
-
+.fa-search.fa-w-16 {
+  position: absolute;
+  margin-left: 41%;
+  color: #979ea3;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  border: 1px solid #dbe2ed;
+  background-color: #fff;
+  padding: 9px 10px 7px 10px;
+}
+input {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  border: 1px solid #dbe2ed;
+  border-radius: 3px;
+  color: #979ea3;
+  outline: 0;
+  padding: 7px 17px;
+}
 .article {
   color: $blue;
   border: 1px solid #dbe2ed;
+  border-radius: 4px;
   background-color: #fff;
   margin-bottom: 20px;
   padding: 10px;
   text-transform: capitalize;
   .content {
-    color: #34393e;
+    color: $light-black;
     text-transform: capitalize;
+  }
+  .author {
+  color: #a9afb3;
   }
 }
 

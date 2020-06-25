@@ -81,7 +81,7 @@ update msg model = case msg of
     case result of
       Err _ ->
         let _ = Debug.log "result" result
-         in (model, Cmd.none)
+          in (model, Cmd.none)
       Ok newArticles ->
         ({ model | articles = newArticles }, Cmd.none)
   FetchAuthorsDone result ->
@@ -104,7 +104,7 @@ articlesWithAuthors articles authors =
           |> List.filter (\auth -> auth.id == art.userId)
           |> List.head
           |> Maybe.map (\author -> (art, author))
-   in values <| List.map f articles
+  in values <| List.map f articles
 
 articleRowView : List (Article, Author) -> Html a
 articleRowView  articles =
@@ -136,7 +136,10 @@ view model =
         groupsOf 3 articles
   in
       div []
-        [ div [] [input [placeholder "Filter by author...", onInput SetQuery] []]
+        [ div []
+          [ i [ class "fas fa-search" ] []
+          , input [placeholder "Filter by author...", onInput SetQuery] []
+          ]
         , div [ class "container" ] (List.map articleRowView rows)
         ]
 
